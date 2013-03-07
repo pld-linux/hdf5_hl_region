@@ -121,7 +121,7 @@ Statyczna biblioteka HDF5 HL_REGION dla Fortranu.
 %patch1 -p1
 
 %build
-%{__make} -f Makefile-F03 \
+%{__make} -f Makefile-F03 -j1 \
 	CC="%{__cc}" \
 	FC="%{_target_alias}-gfortran" \
 	CCFLAGS="%{rpmcflags}" \
