@@ -1,0 +1,233 @@
+--- hdf5_HL_REGION-1.1.1/src/Makefile.orig	2011-12-20 21:39:38.000000000 +0100
++++ hdf5_HL_REGION-1.1.1/src/Makefile	2013-03-03 16:28:12.292295335 +0100
+@@ -16,10 +16,11 @@
+ # source files.
+ SRC = hl_region_H5HLerror.c hl_region_H5HLint.c hl_region_H5LR.c hl_region_H5LT.c
+ 
+-OBJ = $(SRC:.c=.o)
+-
+-OUT = ./libhdf5_hl_region.a
++OBJ = $(SRC:.c=.lo)
+ 
++OUT = ./libhdf5_hl_region.la
++LIBTOOL = libtool
++LIBDIR = /usr/lib
+ 
+ # test to see if h5cc compiler is set
+ 
+@@ -43,11 +44,15 @@
+ 
+ default: $(OUT)
+ 
+-.c.o:
+-	$(CC) $(INCLUDES) $(CCFLAGS) -c $< -o $@
++%.lo: %.c
++	$(LIBTOOL) --mode=compile --tag=CC $(CC) $(INCLUDES) $(CCFLAGS) -c $< -o $@
+ 
+ $(OUT): $(OBJ)
+-	ar rcs $(OUT) $(OBJ)
++	$(LIBTOOL) --mode=link --tag=CC $(CC) $(LDFLAGS) $(CCFLAGS) -o $(OUT) $(OBJ) -rpath $(LIBDIR) -lhdf5
++
++install:
++	install -d $(DESTDIR)$(LIBDIR)
++	$(LIBTOOL) --mode=install install $(OUT) $(DESTDIR)$(LIBDIR)
+ 
+ clean:
+ 	\rm -f $(OBJ) $(OUT) 
+--- hdf5_HL_REGION-1.1.1/test/Makefile.orig	2011-12-20 21:39:38.000000000 +0100
++++ hdf5_HL_REGION-1.1.1/test/Makefile	2013-03-03 17:58:11.605402080 +0100
+@@ -16,17 +16,18 @@
+ # include directories
+ INCLUDES = -I$(HDF5_INSTALL_DIR)/include -I../src
+ 
+-LIBS = -L../src -lhdf5_hl_region
++LIBS = ../src/libhdf5_hl_region.la -lhdf5_hl
++LIBTOOL = libtool
+ 
+ CC = $(HDF5_INSTALL_DIR)/bin/h5cc
+ 
+ all: test_bitfield test_regref_hyper
+ 
+ test_bitfield: test_bitfield.c 
+-	$(CC) test_bitfield.c  -o test_bitfield $(LIBS) $(INCLUDES)
++	$(LIBTOOL) --mode=link --tag=CC $(CC) test_bitfield.c  -o test_bitfield $(LIBS) $(INCLUDES)
+ 
+ test_regref_hyper: test_regref_hyper.c
+-	$(CC) test_regref_hyper.c -o test_regref_hyper $(LIBS) $(INCLUDES)
++	$(LIBTOOL) --mode=link --tag=CC $(CC) test_regref_hyper.c -o test_regref_hyper $(LIBS) $(INCLUDES)
+ 
+ tests:
+ 	./test_bitfield; ./test_regref_hyper
+--- hdf5_HL_REGION-1.1.1/examples/Makefile.orig	2011-12-20 21:39:38.000000000 +0100
++++ hdf5_HL_REGION-1.1.1/examples/Makefile	2013-03-03 17:59:12.908732842 +0100
+@@ -14,7 +14,8 @@
+ ##############################################################################
+ 
+ #
+-LIBS = -L../src -lhdf5_hl_region
++LIBS = ../src/libhdf5_hl_region.la -lhdf5_hl
++LIBTOOL = libtool
+ INCLUDES = -I../src
+ 
+ # compiler
+@@ -24,28 +25,28 @@
+ all: ex_bitfield ex_lite_copy_region ex_lite_read_region ex_regref_copy_references ex_regref_create ex_regref_read ex_ref_to_all ex_GMGTO
+ 
+ ex_bitfield: ex_bitfield.c
+-	$(CC) ex_bitfield.c -o ex_bitfield $(LIBS) $(INCLUDES)
++	$(LIBTOOL) --mode=link --tag=CC $(CC) ex_bitfield.c -o ex_bitfield $(LIBS) $(INCLUDES)
+ 
+ ex_lite_copy_region: ex_lite_copy_region.c
+-	$(CC) ex_lite_copy_region.c -o ex_lite_copy_region $(LIBS) $(INCLUDES)
++	$(LIBTOOL) --mode=link --tag=CC $(CC) ex_lite_copy_region.c -o ex_lite_copy_region $(LIBS) $(INCLUDES)
+ 
+ ex_lite_read_region: ex_lite_read_region.c
+-	$(CC) ex_lite_read_region.c -o ex_lite_read_region $(LIBS) $(INCLUDES)
++	$(LIBTOOL) --mode=link --tag=CC $(CC) ex_lite_read_region.c -o ex_lite_read_region $(LIBS) $(INCLUDES)
+ 
+ ex_regref_copy_references: ex_regref_copy_references.c
+-	$(CC) ex_regref_copy_references.c -o ex_regref_copy_references $(LIBS) $(INCLUDES)
++	$(LIBTOOL) --mode=link --tag=CC $(CC) ex_regref_copy_references.c -o ex_regref_copy_references $(LIBS) $(INCLUDES)
+ 
+ ex_regref_create: ex_regref_create.c
+-	$(CC) ex_regref_create.c -o ex_regref_create $(LIBS) $(INCLUDES)
++	$(LIBTOOL) --mode=link --tag=CC $(CC) ex_regref_create.c -o ex_regref_create $(LIBS) $(INCLUDES)
+ 
+ ex_regref_read: ex_regref_read.c
+-	$(CC) ex_regref_read.c -o ex_regref_read $(LIBS) $(INCLUDES)
++	$(LIBTOOL) --mode=link --tag=CC $(CC) ex_regref_read.c -o ex_regref_read $(LIBS) $(INCLUDES)
+ 
+ ex_ref_to_all: ex_ref_to_all.c
+-	$(CC) ex_ref_to_all.c -o ex_ref_to_all $(LIBS) $(INCLUDES)
++	$(LIBTOOL) --mode=link --tag=CC $(CC) ex_ref_to_all.c -o ex_ref_to_all $(LIBS) $(INCLUDES)
+ 
+ ex_GMGTO: ex_GMGTO.c
+-	$(CC) ex_GMGTO.c -o ex_GMGTO $(LIBS) $(INCLUDES)	
++	$(LIBTOOL) --mode=link --tag=CC $(CC) ex_GMGTO.c -o ex_GMGTO $(LIBS) $(INCLUDES)	
+ 
+ tests:
+ 	./test.sh
+--- hdf5_HL_REGION-1.1.1/fortran/src/Makefile.orig	2011-12-20 21:39:38.000000000 +0100
++++ hdf5_HL_REGION-1.1.1/fortran/src/Makefile	2013-03-03 18:03:26.355388871 +0100
+@@ -17,10 +17,12 @@
+ SRC_C   = hl_region_H5LTf.c hl_region_H5LRf.c
+ SRC_F90 = hl_region_H5LTff.f90 hl_region_H5LRff.f90 h5hl_region.f90
+ 
+-OBJ_C   = $(SRC_C:.c=.o)
+-OBJ_F90 = $(SRC_F90:.f90=.o)
++OBJ_C   = $(SRC_C:.c=.lo)
++OBJ_F90 = $(SRC_F90:.f90=.lo)
+ 
+-OUT = ./libhdf5_hl_region_fortran.a
++OUT = ./libhdf5_hl_region_fortran.la
++LIBTOOL = libtool
++LIBDIR = /usr/lib
+ 
+ # include directories
+ INCLUDES = -I$(HDF5_INSTALL_DIR)/include
+@@ -33,14 +35,14 @@
+ 
+ default: $(OUT)
+ 
+-.c.o:
+-	$(CC) $(INCLUDES) $(CCFLAGS) -c $< -o $@
++%.lo: %.c
++	$(LIBTOOL) --mode=compile --tag=CC $(CC) $(INCLUDES) $(CCFLAGS) -c $< -o $@
+ 
+-.f90.o:
+-	$(FC) $(INCLUDES) $(FCFLAGS) -c $< -o $@
++%.lo: %.f90
++	$(LIBTOOL) --mode=compile --tag=F77 $(FC) $(INCLUDES) $(FCFLAGS) -c $< -o $@
+ 
+ $(OUT): $(OBJ_C) $(OBJ_F90)
+-	ar rcs $(OUT) $(OBJ_C) $(OBJ_F90)
++	$(LIBTOOL) --mode=link --tag=F77 $(FC) -o $(OUT) $(OBJ_C) $(OBJ_F90) -rpath $(LIBDIR) ../../src/libhdf5_hl_region.la -lhdf5_fortran
+ # link the module files so the compiler can find them
+ # to avoid setting the module path explicitly
+ 	ln -sf ../src/hl_region_h5lr.mod ../examples/hl_region_h5lr.mod
+@@ -50,5 +52,9 @@
+ 	ln -sf ../src/hl_region_h5lt.mod ../test/hl_region_h5lt.mod
+ 	ln -sf ../src/h5hl_region.mod ../test/h5hl_region.mod
+ 
++install:
++	install -d $(DESTDIR)$(LIBDIR)
++	$(LIBTOOL) --mode=install install $(OUT) $(DESTDIR)$(LIBDIR)
++
+ clean:
+ 	\rm -f $(OBJ_C) $(OBJ_F90) $(OUT) *.mod 
+--- hdf5_HL_REGION-1.1.1/fortran/examples/Makefile.orig	2011-12-20 21:39:38.000000000 +0100
++++ hdf5_HL_REGION-1.1.1/fortran/examples/Makefile	2013-03-03 18:07:22.965378941 +0100
+@@ -13,8 +13,8 @@
+ # 
+ ##############################################################################
+ 
+-#
+-LIBS = -L../src -L../../src -lhdf5_hl_region_fortran -lhdf5_hl_region 
+-INCLUDES = -I../src -I../../src 
++LIBTOOL = libtool
++LIBS = ../src/libhdf5_hl_region_fortran.la ../../src/libhdf5_hl_region.la -lhdf5hl_fortran
++INCLUDES = -I../src -I../../src -I/usr/include
+ 
+ # compiler
+@@ -25,25 +25,25 @@
+ all: $(EXEC)
+ 
+ ex_lite_read_region: ex_lite_read_region.f90
+-	$(FC) ex_lite_read_region.f90 -o ex_lite_read_region $(LIBS) $(INCLUDES)
++	$(LIBTOOL) --mode=link --tag=F77 $(FC) ex_lite_read_region.f90 -o ex_lite_read_region $(LIBS) $(INCLUDES)
+ 
+ ex_lite_copy_region: ex_lite_copy_region.f90
+-	$(FC) ex_lite_copy_region.f90 -o ex_lite_copy_region $(LIBS) $(INCLUDES)
++	$(LIBTOOL) --mode=link --tag=F77 $(FC) ex_lite_copy_region.f90 -o ex_lite_copy_region $(LIBS) $(INCLUDES)
+ 
+ ex_bitfield: ex_bitfield.f90
+-	$(FC) ex_bitfield.f90 -o ex_bitfield $(LIBS) $(INCLUDES)
++	$(LIBTOOL) --mode=link --tag=F77 $(FC) ex_bitfield.f90 -o ex_bitfield $(LIBS) $(INCLUDES)
+ 
+ ex_regref_create: ex_regref_create.f90
+-	$(FC) ex_regref_create.f90 -o ex_regref_create $(LIBS) $(INCLUDES)
++	$(LIBTOOL) --mode=link --tag=F77 $(FC) ex_regref_create.f90 -o ex_regref_create $(LIBS) $(INCLUDES)
+ 
+ ex_regref_read: ex_regref_read.f90
+-	$(FC) ex_regref_read.f90 -o ex_regref_read $(LIBS) $(INCLUDES)
++	$(LIBTOOL) --mode=link --tag=F77 $(FC) ex_regref_read.f90 -o ex_regref_read $(LIBS) $(INCLUDES)
+ 
+ ex_regref_copy_reference: ex_regref_copy_reference.f90
+-	$(FC) ex_regref_copy_reference.f90 -o ex_regref_copy_reference $(LIBS) $(INCLUDES)
++	$(LIBTOOL) --mode=link --tag=F77 $(FC) ex_regref_copy_reference.f90 -o ex_regref_copy_reference $(LIBS) $(INCLUDES)
+ 
+ ex_ref_to_all: ex_ref_to_all.f90
+-	$(FC) ex_ref_to_all.f90 -o ex_ref_to_all $(LIBS) $(INCLUDES)
++	$(LIBTOOL) --mode=link --tag=F77 $(FC) ex_ref_to_all.f90 -o ex_ref_to_all $(LIBS) $(INCLUDES)
+ 
+ 
+ tests:
+--- hdf5_HL_REGION-1.1.1/fortran/test/Makefile.orig	2011-12-20 21:39:38.000000000 +0100
++++ hdf5_HL_REGION-1.1.1/fortran/test/Makefile	2013-03-03 18:08:25.478709653 +0100
+@@ -16,20 +16,21 @@
+ # include directories
+-INCLUDES = -I../src -I../../src 
++INCLUDES = -I../src -I../../src -I/usr/include
+ 
+-LIBS = -L../src -L../../src -lhdf5_hl_region_fortran -lhdf5_hl_region 
++LIBTOOL = libtool
++LIBS = ../src/libhdf5_hl_region_fortran.la ../../src/libhdf5_hl_region.la -lhdf5hl_fortran
+ 
+ FC = $(HDF5_INSTALL_DIR)/bin/h5fc
+ 
+ all:  test_util test_bitfield test_regref_hyper
+ 
+ test_bitfield: test_bitfield.f90 test_util.o
+-	$(FC) test_bitfield.f90 -o test_bitfield test_util.o $(LIBS) $(INCLUDES)
++	$(LIBTOOL) --mode=link --tag=F77 $(FC) test_bitfield.f90 -o test_bitfield test_util.lo $(LIBS) $(INCLUDES)
+ 
+ test_regref_hyper: test_regref_hyper.f90 test_util.o
+-	$(FC) test_regref_hyper.f90 -o test_regref_hyper test_util.o $(LIBS) $(INCLUDES)
++	$(LIBTOOL) --mode=link --tag=F77 $(FC) test_regref_hyper.f90 -o test_regref_hyper test_util.lo $(LIBS) $(INCLUDES)
+ 
+ test_util: test_util.f90
+-	$(FC) -c test_util.f90 $(LIBS) $(INCLUDES)
++	$(LIBTOOL) --mode=compile --tag=F77 $(FC) -c test_util.f90 -o test_util.lo $(INCLUDES)
+ 
+ tests:
+ 	./test_bitfield; ./test_regref_hyper
