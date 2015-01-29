@@ -107,9 +107,9 @@
  
  tests:
  	./test.sh
---- hdf5_HL_REGION-1.1.1/fortran/src/Makefile.orig	2011-12-20 21:39:38.000000000 +0100
-+++ hdf5_HL_REGION-1.1.1/fortran/src/Makefile	2013-03-03 18:03:26.355388871 +0100
-@@ -17,10 +17,12 @@
+--- hdf5_HL_REGION-1.1.3/fortran/src/Makefile.orig	2014-12-08 23:28:30.000000000 +0100
++++ hdf5_HL_REGION-1.1.3/fortran/src/Makefile	2015-01-28 21:30:56.476934812 +0100
+@@ -21,24 +21,26 @@
  SRC_C   = hl_region_H5LTf.c hl_region_H5LRf.c
  SRC_F90 = hl_region_H5LTff.f90 hl_region_H5LRff.f90 h5hl_region.f90
  
@@ -125,7 +125,6 @@
  
  # include directories
  INCLUDES = -I$(HDF5_INSTALL_DIR)/include
-@@ -33,14 +35,14 @@
  
  default: $(OUT)
  
@@ -134,9 +133,9 @@
 +%.lo: %.c
 +	$(LIBTOOL) --mode=compile --tag=CC $(CC) $(INCLUDES) $(CCFLAGS) -c $< -o $@
  
--.f90.o:
+-%.o %.mod: %.f90
 -	$(FC) $(INCLUDES) $(FCFLAGS) -c $< -o $@
-+%.lo: %.f90
++%.lo %.mod: %.f90
 +	$(LIBTOOL) --mode=compile --tag=F77 $(FC) $(INCLUDES) $(FCFLAGS) -c $< -o $@
  
  $(OUT): $(OBJ_C) $(OBJ_F90)
@@ -145,7 +144,7 @@
  # link the module files so the compiler can find them
  # to avoid setting the module path explicitly
  	ln -sf ../src/hl_region_h5lr.mod ../examples/hl_region_h5lr.mod
-@@ -50,5 +52,9 @@
+@@ -48,6 +50,10 @@
  	ln -sf ../src/hl_region_h5lt.mod ../test/hl_region_h5lt.mod
  	ln -sf ../src/h5hl_region.mod ../test/h5hl_region.mod
  
@@ -154,7 +153,8 @@
 +	$(LIBTOOL) --mode=install install $(OUT) $(DESTDIR)$(LIBDIR)
 +
  clean:
- 	\rm -f $(OBJ_C) $(OBJ_F90) $(OUT) *.mod 
+ 	\rm -f $(OBJ_C) $(OBJ_F90) $(OUT) *.mod
+ 
 --- hdf5_HL_REGION-1.1.1/fortran/examples/Makefile.orig	2011-12-20 21:39:38.000000000 +0100
 +++ hdf5_HL_REGION-1.1.1/fortran/examples/Makefile	2013-03-03 18:07:22.965378941 +0100
 @@ -13,8 +13,8 @@
@@ -202,9 +202,11 @@
  
  
  tests:
---- hdf5_HL_REGION-1.1.1/fortran/test/Makefile.orig	2011-12-20 21:39:38.000000000 +0100
-+++ hdf5_HL_REGION-1.1.1/fortran/test/Makefile	2013-03-03 18:08:25.478709653 +0100
-@@ -16,20 +16,21 @@
+--- hdf5_HL_REGION-1.1.3/fortran/test/Makefile.orig	2015-01-28 21:24:12.416951770 +0100
++++ hdf5_HL_REGION-1.1.3/fortran/test/Makefile	2015-01-28 21:35:49.700255840 +0100
+@@ -14,9 +14,10 @@
+ ##############################################################################
+ 
  # include directories
 -INCLUDES = -I../src -I../../src 
 +INCLUDES = -I../src -I../../src -I/usr/include
@@ -213,21 +215,18 @@
 +LIBTOOL = libtool
 +LIBS = ../src/libhdf5_hl_region_fortran.la ../../src/libhdf5_hl_region.la -lhdf5hl_fortran
  
- FC = $(HDF5_INSTALL_DIR)/bin/h5fc
+ .SUFFIXES: .f90
  
- all:  test_util test_bitfield test_regref_hyper
+@@ -25,10 +26,10 @@
+ all:  test_util.o test_bitfield test_regref_hyper
  
  test_bitfield: test_bitfield.f90 test_util.o
 -	$(FC) test_bitfield.f90 -o test_bitfield test_util.o $(LIBS) $(INCLUDES)
-+	$(LIBTOOL) --mode=link --tag=F77 $(FC) test_bitfield.f90 -o test_bitfield test_util.lo $(LIBS) $(INCLUDES)
++	$(LIBTOOL) --mode=link --tag=F77 $(FC) test_bitfield.f90 -o test_bitfield test_util.o $(LIBS) $(INCLUDES)
  
  test_regref_hyper: test_regref_hyper.f90 test_util.o
 -	$(FC) test_regref_hyper.f90 -o test_regref_hyper test_util.o $(LIBS) $(INCLUDES)
-+	$(LIBTOOL) --mode=link --tag=F77 $(FC) test_regref_hyper.f90 -o test_regref_hyper test_util.lo $(LIBS) $(INCLUDES)
++	$(LIBTOOL) --mode=link --tag=F77 $(FC) test_regref_hyper.f90 -o test_regref_hyper test_util.o $(LIBS) $(INCLUDES)
  
- test_util: test_util.f90
--	$(FC) -c test_util.f90 $(LIBS) $(INCLUDES)
-+	$(LIBTOOL) --mode=compile --tag=F77 $(FC) -c test_util.f90 -o test_util.lo $(INCLUDES)
- 
- tests:
- 	./test_bitfield; ./test_regref_hyper
+ test_util.o: test_util.f90
+ 	$(FC) -c test_util.f90 $(LIBS) $(INCLUDES)

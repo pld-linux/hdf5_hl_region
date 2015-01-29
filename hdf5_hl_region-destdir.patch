@@ -1,6 +1,6 @@
---- hdf5_HL_REGION-1.1.1/Makefile-F03.orig	2011-12-20 21:39:38.000000000 +0100
-+++ hdf5_HL_REGION-1.1.1/Makefile-F03	2013-03-04 18:36:32.351679663 +0100
-@@ -44,16 +44,16 @@
+--- hdf5_HL_REGION-1.1.3/Makefile.orig	2015-01-28 21:43:03.733570959 +0100
++++ hdf5_HL_REGION-1.1.3/Makefile	2015-01-28 21:43:08.200237439 +0100
+@@ -70,17 +70,17 @@
  	 cd ../test; $(MAKE));fi
  
  install:
@@ -10,18 +10,21 @@
 -	(cp src/hl_region_H5LRpublic.h $(PREFIX)/include )
 -	(cp src/hl_region_H5LTpublic.h $(PREFIX)/include )
 -	(cp src/h5hl_region.h $(PREFIX)/include )
+-	(cp src/h5hl_api.h $(PREFIX)/include )
 +	(mkdir -p $(DESTDIR)$(LIBDIR))
 +	(mkdir -p $(DESTDIR)$(PREFIX)/include)
 +	($(MAKE) -C src install)
 +	(cp src/hl_region_H5LRpublic.h $(DESTDIR)$(PREFIX)/include )
 +	(cp src/hl_region_H5LTpublic.h $(DESTDIR)$(PREFIX)/include )
 +	(cp src/h5hl_region.h $(DESTDIR)$(PREFIX)/include )
- # if h5fc is available then install FORTRAN source
- 	if test -e $(HDF5_INSTALL_DIR)/bin/h5fc; then \
++	(cp src/h5hl_api.h $(DESTDIR)$(PREFIX)/include )
+ # if fortran enabled then compile FORTRAN source
+-	if test -e fortran/src/h5hl_region.o ; then \
 -	(cp fortran/src/libhdf5_hl_region_fortran.a $(PREFIX)/lib; \
 -	 cp fortran/src/*.mod $(PREFIX)/include );fi
++	if test -e fortran/src/h5hl_region.lo ; then \
 +	($(MAKE) -C fortran/src install; \
 +	 cp fortran/src/*.mod $(DESTDIR)$(PREFIX)/include );fi
  
- 
  tests:
+ 	(cd test; $(MAKE) tests )

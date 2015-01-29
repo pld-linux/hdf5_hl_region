@@ -6,12 +6,12 @@
 Summary:	High-Level Library for handling HDF5 object and region references
 Summary(pl.UTF-8):	Wysokopoziomowa biblioteka do obsługi odniesień do obiektów i regionów HDF5
 Name:		hdf5_hl_region
-Version:	1.1.2
-Release:	3
+Version:	1.1.3
+Release:	1
 License:	BSD-like, changed sources must be marked
 Group:		Libraries
 Source0:	http://www.hdfgroup.uiuc.edu/ftp/pub/outgoing/NPOESS/source/hdf5_HL_REGION-%{version}.tar
-# Source0-md5:	800af3c22b8fa8571e48ad17b87b8707
+# Source0-md5:	72b64bca020e8657f4e54ca7d9dfa57d
 Patch0:		%{name}-shared.patch
 Patch1:		%{name}-destdir.patch
 URL:		http://www.hdfgroup.org/projects/npoess/HL_index.html
@@ -121,28 +121,31 @@ Statyczna biblioteka HDF5 HL_REGION dla Fortranu.
 %patch1 -p1
 
 %build
-%{__make} -f Makefile-F03 -j1 \
+%{__make} -j1 \
 	CC="%{__cc}" \
 	FC="%{_target_alias}-gfortran" \
 	CCFLAGS="%{rpmcflags}" \
 	FCFLAGS="%{rpmcflags}" \
+	CHCK_H5FC2003="Fortran 2003 Compiler: yes" \
 	HDF5_INSTALL_DIR=/usr \
 	HDF5_USE_SHLIB=yes \
-	LIBDIR=%{_libdir}
+	LIBDIR=%{_libdir} \
+	enable-fortran=yes
 
 %if %{with tests}
-%{__make} -f Makefile-F03 tests \
+%{__make} tests \
 	HDF5_INSTALL_DIR=/usr
 %endif
 
 %install
 rm -rf $RPM_BUILD_ROOT
 
-%{__make} -f Makefile-F03 install \
+%{__make} install \
 	DESTDIR=$RPM_BUILD_ROOT \
 	PREFIX=%{_prefix} \
 	LIBDIR=%{_libdir} \
-	HDF5_INSTALL_DIR=/usr
+	HDF5_INSTALL_DIR=/usr \
+	enable-fortran=yes
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -163,6 +166,7 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_libdir}/libhdf5_hl_region.so
 %{_libdir}/libhdf5_hl_region.la
+%{_includedir}/h5hl_api.h
 %{_includedir}/h5hl_region.h
 %{_includedir}/hl_region_H5LRpublic.h
 %{_includedir}/hl_region_H5LTpublic.h
