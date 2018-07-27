@@ -7,7 +7,7 @@ Summary:	High-Level Library for handling HDF5 object and region references
 Summary(pl.UTF-8):	Wysokopoziomowa biblioteka do obsługi odniesień do obiektów i regionów HDF5
 Name:		hdf5_hl_region
 Version:	1.1.3
-Release:	3
+Release:	4
 License:	BSD-like, changed sources must be marked
 Group:		Libraries
 Source0:	http://www.hdfgroup.uiuc.edu/ftp/pub/outgoing/NPOESS/source/hdf5_HL_REGION-%{version}.tar
