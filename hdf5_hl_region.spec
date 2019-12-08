@@ -14,6 +14,7 @@ Source0:	http://www.hdfgroup.uiuc.edu/ftp/pub/outgoing/NPOESS/source/hdf5_HL_REG
 # Source0-md5:	72b64bca020e8657f4e54ca7d9dfa57d
 Patch0:		%{name}-shared.patch
 Patch1:		%{name}-destdir.patch
+Patch2:		hdf5-1.10.patch
 URL:		http://www.hdfgroup.org/projects/npoess/HL_index.html
 BuildRequires:	autoconf >= 2.59
 BuildRequires:	automake
@@ -119,6 +120,7 @@ Statyczna biblioteka HDF5 HL_REGION dla Fortranu.
 %setup -q -n hdf5_HL_REGION-%{version}
 %patch0 -p1
 %patch1 -p1
+%patch2 -p1
 
 %build
 %{__make} -j1 \
