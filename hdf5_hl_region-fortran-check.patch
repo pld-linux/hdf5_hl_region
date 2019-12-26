@@ -1,0 +1,18 @@
+--- hdf5_HL_REGION-1.1.5/Makefile.orig	2019-12-26 18:04:48.693066151 +0100
++++ hdf5_HL_REGION-1.1.5/Makefile	2019-12-26 18:15:01.509746238 +0100
+@@ -47,12 +47,12 @@
+  ifeq (,$(wildcard $(HDF5_INSTALL_DIR)/bin/h5fc))
+    $(error "CONFIGURE ERROR: HDF5 library must be built with the --enable-fortran option")
+  endif
+- FC = $(HDF5_INSTALL_DIR)/bin/h5fc
++ H5FC = $(HDF5_INSTALL_DIR)/bin/h5fc
+ 
+ # check to make sure hdf5 was built with --enable-fortran2003 (needed for versions prior to 1.10)
+- CHCK_HDF5VER:= $(strip $(shell $(FC) -showconfig | grep -i "HDF5 Version:" | sed 's/^.* //g'))
++ CHCK_HDF5VER:= $(strip $(shell $(H5FC) -showconfig | grep -i "HDF5 Version:" | sed 's/^.* //g'))
+  ifeq "$(shell expr $(CHCK_HDF5VER) \<1.9)" "1"
+-   CHCK_H5FC2003:= $(strip $(shell $(FC) -showconfig | grep -i 2003))
++   CHCK_H5FC2003:= $(strip $(shell $(H5FC) -showconfig | grep -i 2003))
+    ifneq ("$(CHCK_H5FC2003)","Fortran 2003 Compiler: yes")
+      $(error "CONFIGURE ERROR: HDF5 library must be built with the --enable-fortran2003 option")
+    endif

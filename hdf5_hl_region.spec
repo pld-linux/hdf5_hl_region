@@ -1,23 +1,21 @@
 #
 # Conditional build:
 %bcond_without	fortran		# Fortran API
-%bcond_with	tests		# perform "make tests" (reference dumps differ from current h5dump)
+%bcond_without	tests		# perform "make tests"
 #
 Summary:	High-Level Library for handling HDF5 object and region references
 Summary(pl.UTF-8):	Wysokopoziomowa biblioteka do obsługi odniesień do obiektów i regionów HDF5
 Name:		hdf5_hl_region
-Version:	1.1.3
-Release:	5
+Version:	1.1.5
+Release:	1
 License:	BSD-like, changed sources must be marked
 Group:		Libraries
-Source0:	http://www.hdfgroup.uiuc.edu/ftp/pub/outgoing/NPOESS/source/hdf5_HL_REGION-%{version}.tar
-# Source0-md5:	72b64bca020e8657f4e54ca7d9dfa57d
+Source0:	https://gamma.hdfgroup.org/ftp/pub/outgoing/JPSS/HL_JPSS/hdf5_HL_REGION-%{version}.tar
+# Source0-md5:	0e07c7c76eba6e8180ef8973b245f821
 Patch0:		%{name}-shared.patch
 Patch1:		%{name}-destdir.patch
-Patch2:		hdf5-1.10.patch
-URL:		http://www.hdfgroup.org/projects/npoess/HL_index.html
-BuildRequires:	autoconf >= 2.59
-BuildRequires:	automake
+Patch2:		%{name}-fortran-check.patch
+URL:		http://portal.hdfgroup.org/display/support/Joint+Polar+Satellite+System+-+JPSS
 BuildRequires:	hdf5-devel
 %{?with_fortran:BuildRequires:	hdf5-fortran-devel}
 %{?with_tests:BuildRequires:	hdf5-progs}
@@ -128,7 +126,6 @@ Statyczna biblioteka HDF5 HL_REGION dla Fortranu.
 	FC="%{_target_alias}-gfortran" \
 	CCFLAGS="%{rpmcflags}" \
 	FCFLAGS="%{rpmcflags}" \
-	CHCK_H5FC2003="Fortran 2003 Compiler: yes" \
 	HDF5_INSTALL_DIR=/usr \
 	HDF5_USE_SHLIB=yes \
 	LIBDIR=%{_libdir} \
