@@ -58,8 +58,8 @@
  
  tests:
  	./test_bitfield; ./test_regref_hyper
---- hdf5_HL_REGION-1.1.1/examples/Makefile.orig	2011-12-20 21:39:38.000000000 +0100
-+++ hdf5_HL_REGION-1.1.1/examples/Makefile	2013-03-03 17:59:12.908732842 +0100
+--- hdf5_HL_REGION-1.1.5/examples/Makefile.orig	2016-07-19 16:32:33.000000000 +0200
++++ hdf5_HL_REGION-1.1.5/examples/Makefile	2024-12-14 16:15:44.200665735 +0100
 @@ -14,7 +14,8 @@
  ##############################################################################
  
@@ -70,8 +70,8 @@
  INCLUDES = -I../src
  
  # compiler
-@@ -24,28 +25,28 @@
- all: ex_bitfield ex_lite_copy_region ex_lite_read_region ex_regref_copy_references ex_regref_create ex_regref_read ex_ref_to_all ex_GMGTO
+@@ -26,28 +27,28 @@ TMP_HDF5_FILES = $(addsuffix .h5, $(EXEC
+ all: $(EXEC)
  
  ex_bitfield: ex_bitfield.c
 -	$(CC) ex_bitfield.c -o ex_bitfield $(LIBS) $(INCLUDES)
@@ -155,9 +155,9 @@
  clean:
  	\rm -f $(OBJ_C) $(OBJ_F90) $(OUT) *.mod
  
---- hdf5_HL_REGION-1.1.1/fortran/examples/Makefile.orig	2011-12-20 21:39:38.000000000 +0100
-+++ hdf5_HL_REGION-1.1.1/fortran/examples/Makefile	2013-03-03 18:07:22.965378941 +0100
-@@ -13,8 +13,8 @@
+--- hdf5_HL_REGION-1.1.5/fortran/examples/Makefile.orig	2024-12-14 16:16:22.943789179 +0100
++++ hdf5_HL_REGION-1.1.5/fortran/examples/Makefile	2024-12-14 16:17:26.760110123 +0100
+@@ -13,9 +13,9 @@
  # 
  ##############################################################################
  
@@ -169,7 +169,8 @@
 +INCLUDES = -I../src -I../../src -I/usr/include
  
  # compiler
-@@ -25,25 +25,25 @@
+ FC = $(HDF5_INSTALL_DIR)/bin/h5fc 
+@@ -26,25 +26,25 @@ TMP_HDF5_FILES = $(addsuffix .h5, $(EXEC
  all: $(EXEC)
  
  ex_lite_read_region: ex_lite_read_region.f90
@@ -200,8 +201,8 @@
 -	$(FC) ex_ref_to_all.f90 -o ex_ref_to_all $(LIBS) $(INCLUDES)
 +	$(LIBTOOL) --mode=link --tag=F77 $(FC) ex_ref_to_all.f90 -o ex_ref_to_all $(LIBS) $(INCLUDES)
  
- 
  tests:
+ 	./test.sh
 --- hdf5_HL_REGION-1.1.3/fortran/test/Makefile.orig	2015-01-28 21:24:12.416951770 +0100
 +++ hdf5_HL_REGION-1.1.3/fortran/test/Makefile	2015-01-28 21:35:49.700255840 +0100
 @@ -14,9 +14,10 @@

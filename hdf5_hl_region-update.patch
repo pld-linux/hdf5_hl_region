@@ -1,0 +1,259 @@
+--- hdf5_HL_REGION-1.1.5/src/hl_region_H5LR.c.orig	2016-06-20 23:28:59.000000000 +0200
++++ hdf5_HL_REGION-1.1.5/src/hl_region_H5LR.c	2024-12-14 18:46:07.798447376 +0100
+@@ -200,7 +200,7 @@ op_func_L(hid_t loc_id, const char *name
+      * The name of the object is passed to this function by
+      * the Library.
+      */
+-    status = H5Oget_info_by_name(loc_id, name, &infobuf, H5P_DEFAULT);
++    status = H5Oget_info_by_name3(loc_id, name, &infobuf, H5O_INFO_ALL, H5P_DEFAULT);
+     if(status < 0) return -1;
+ 
+     return op_func(loc_id, name, &infobuf, operator_data);
+@@ -626,12 +626,12 @@ H5LRmake_dataset(hid_t loc_id, const cha
+     */
+ 
+     for(i=0; i<buf_size; i++) {
+-        dset_ref = H5Rdereference_(loc_id_ref[i], H5R_DATASET_REGION, ref[i]);
++        dset_ref = H5Rdereference_(loc_id_ref[i], H5R_DATASET_REGION, ref + i);
+         if(dset_ref < 0)
+             H5E_THROW(H5E_NOTFOUND, "H5LR: Failed to open object referenced")
+ 
+         /* Retrieve the dataspace with the specified region selected */
+-        space_ref = H5Rget_region (dset_ref, H5R_DATASET_REGION, ref[i]);
++        space_ref = H5Rget_region (dset_ref, H5R_DATASET_REGION, ref + i);
+         if(space_ref < 0)
+             H5E_THROW(H5E_CANTGET, "H5LR: Retrieving dataspace referenced failed")
+ 
+@@ -760,12 +760,12 @@ H5LRmake_dataset(hid_t loc_id, const cha
+     /* loop over the region references to write data into new data set */
+     icnt = 0;
+     for(i=0; i<buf_size; i++) {
+-        dset_ref = H5Rdereference_(loc_id_ref[i], H5R_DATASET_REGION, ref[i]);
++        dset_ref = H5Rdereference_(loc_id_ref[i], H5R_DATASET_REGION, ref + i);
+         if(dset_ref < 0)
+             H5E_THROW(H5E_NOTFOUND, "H5LR: Failed to open object referenced")
+ 
+         /* Retrieve the dataspace with the specified region selected */
+-        space_ref = H5Rget_region(dset_ref, H5R_DATASET_REGION, ref[i]);
++        space_ref = H5Rget_region(dset_ref, H5R_DATASET_REGION, ref + i);
+         if(space_ref < 0)
+             H5E_THROW(H5E_CANTGET, "H5LR: Retrieving dataspace referenced failed")
+ 
+@@ -1784,12 +1784,12 @@ H5LRmake_dataset_FORTRAN(hid_t loc_id, c
+     */
+ 
+     for(i=0; i<buf_size; i++) {
+-        dset_ref = H5Rdereference_(loc_id_ref[i], H5R_DATASET_REGION, ref[i]);
++        dset_ref = H5Rdereference_(loc_id_ref[i], H5R_DATASET_REGION, ref + i);
+         if(dset_ref < 0)
+             H5E_THROW(H5E_NOTFOUND, "H5LR: Failed to open object referenced")
+ 
+         /* Retrieve the dataspace with the specified region selected */
+-        space_ref = H5Rget_region (dset_ref, H5R_DATASET_REGION, ref[i]);
++        space_ref = H5Rget_region (dset_ref, H5R_DATASET_REGION, ref + i);
+         if(space_ref < 0)
+             H5E_THROW(H5E_CANTGET, "H5LR: Retrieving dataspace referenced failed")
+ 
+@@ -1920,12 +1920,12 @@ H5LRmake_dataset_FORTRAN(hid_t loc_id, c
+     /* loop over the region references to write data into new data set */
+     icnt = 0;
+     for(i=0; i<buf_size; i++) {
+-        dset_ref = H5Rdereference_(loc_id_ref[i], H5R_DATASET_REGION, ref[i]);
++        dset_ref = H5Rdereference_(loc_id_ref[i], H5R_DATASET_REGION, ref + i);
+         if(dset_ref < 0)
+             H5E_THROW(H5E_NOTFOUND, "H5LR: Failed to open object referenced")
+ 
+         /* Retrieve the dataspace with the specified region selected */
+-        space_ref = H5Rget_region(dset_ref, H5R_DATASET_REGION, ref[i]);
++        space_ref = H5Rget_region(dset_ref, H5R_DATASET_REGION, ref + i);
+         if(space_ref < 0)
+             H5E_THROW(H5E_CANTGET, "H5LR: Retrieving dataspace referenced failed")
+ 
+--- hdf5_HL_REGION-1.1.5/examples/ex_regref_copy_references.c.orig	2016-06-20 23:29:02.000000000 +0200
++++ hdf5_HL_REGION-1.1.5/examples/ex_regref_copy_references.c	2024-12-14 19:08:39.307792288 +0100
+@@ -149,7 +149,7 @@ int main(void)
+     printf("DATA POINTED TO BY NEW REGION REFERENCE");
+     /* print the data pointed to by the new region reference */
+     status = H5LRread_region(file_id,
+-  			     (const hdset_reg_ref_t*)ref_new,
++  			     &ref_new,
+   			     H5T_NATIVE_INT,
+   			     &numelem_size,
+   			     rdata2);
+--- hdf5_HL_REGION-1.1.5/examples/ex_regref_read.c.orig	2016-06-20 23:29:02.000000000 +0200
++++ hdf5_HL_REGION-1.1.5/examples/ex_regref_read.c	2024-12-14 19:21:42.750214683 +0100
+@@ -133,7 +133,7 @@ int main(void)
+     /* Obtain information about the data associated with the region reference */
+ 
+     status = H5LRget_region_info(file_id,
+-				 (const hdset_reg_ref_t*)ref[0],
++				 ref,
+ 				 &nlength,
+ 				 NULL,
+ 				 &rank_out,
+@@ -151,7 +151,7 @@ int main(void)
+ 
+     /* Get region refererce information, hyperslab coordinates returned in buf */
+     status = H5LRget_region_info(file_id,
+-				 (const hdset_reg_ref_t*)ref[0],
++				 ref,
+ 				 &nlength,
+ 				 name,
+ 				 &rank_out,
+@@ -183,7 +183,7 @@ int main(void)
+ 
+     /* Read a region of the data using a region reference and print it. */
+ 
+-    status = H5LRread_region(file_id,(const hdset_reg_ref_t*)ref[0], 
++    status = H5LRread_region(file_id,ref, 
+ 			     dtype,
+ 			     &numelem, 
+ 			     rdata[0]);
+--- hdf5_HL_REGION-1.1.5/examples/ex_GMGTO.c.orig	2016-06-20 23:29:03.000000000 +0200
++++ hdf5_HL_REGION-1.1.5/examples/ex_GMGTO.c	2024-12-14 21:08:17.208906260 +0100
+@@ -146,7 +146,7 @@ static herr_t op_func_L (hid_t loc_id, c
+      * The name of the object is passed to this function by
+      * the Library.
+      */
+-    status = H5Oget_info_by_name (loc_id, name, &infobuf, H5P_DEFAULT);
++    status = H5Oget_info_by_name3 (loc_id, name, &infobuf, H5O_INFO_ALL, H5P_DEFAULT);
+     if(status < 0) return -1;
+ 
+     return op_func (loc_id, name, &infobuf, operator_data);
+@@ -342,7 +342,7 @@ static int test_reading( const char *fil
+     /* Obtain information about the data associated with the region reference */
+     file_id = H5Fopen(filename_out, H5F_ACC_RDWR,  H5P_DEFAULT);
+     status = H5LRget_region_info(file_id,
+-				 (const hdset_reg_ref_t*)ref[0],
++				 ref,
+ 				 &nlength,
+ 				 NULL,
+ 				 &rank_out,
+@@ -362,7 +362,7 @@ static int test_reading( const char *fil
+ 
+     /* Get region refererce information, hyperslab coordinates returned in buf */
+     status = H5LRget_region_info(file_id,
+-				 (const hdset_reg_ref_t*)ref[0],
++				 ref,
+ 				 &nlength,
+ 				 name,
+ 				 &rank_out,
+@@ -399,7 +399,7 @@ static int test_reading( const char *fil
+     /* Firts, find the appropriate memory type to read in */
+     mtype = H5Tget_native_type(dtype, H5T_DIR_ASCEND);
+ 
+-    status = H5LRread_region(file_id,(const hdset_reg_ref_t*)&ref[0],
++    status = H5LRread_region(file_id,ref,
+ 			     mtype,
+ 			     &numelem,
+ 			     rdata[0]);
+@@ -429,7 +429,7 @@ static int test_reading( const char *fil
+ 
+     file_id_array[0] = file_id;
+ 
+-    status = H5LRmake_dataset(file_id, "/All_Data/copy/Latitude", H5T_NATIVE_FLOAT, 1, file_id_array, ( const hdset_reg_ref_t *)ref[0]);
++    status = H5LRmake_dataset(file_id, "/All_Data/copy/Latitude", H5T_NATIVE_FLOAT, 1, file_id_array, ref);
+ 
+     if(status<0) goto out;
+ 
+--- hdf5_HL_REGION-1.1.5/test/test_regref_hyper.c.orig	2016-06-20 23:28:59.000000000 +0200
++++ hdf5_HL_REGION-1.1.5/test/test_regref_hyper.c	2024-12-14 21:36:49.346297482 +0100
+@@ -179,7 +179,7 @@ static herr_t op_func_L (hid_t loc_id, c
+      * The name of the object is passed to this function by
+      * the Library.
+      */
+-    status = H5Oget_info_by_name (loc_id, name, &infobuf, H5P_DEFAULT);
++    status = H5Oget_info_by_name3 (loc_id, name, &infobuf, H5O_INFO_ALL, H5P_DEFAULT);
+     if(status < 0) return -1;
+ 
+     return op_func (loc_id, name, &infobuf, operator_data);
+@@ -390,7 +390,7 @@ static int test_regref_hyper( void )
+ 
+     /* 1D element section region reference infomation */
+     status = H5LRget_region_info(file_id,
+-				 (const hdset_reg_ref_t*)ref[0],
++				 (const hdset_reg_ref_t*)&ref[0],
+ 				 &nlength,
+ 				 NULL,
+ 				 &rank_out[0],
+@@ -419,7 +419,7 @@ static int test_regref_hyper( void )
+     TESTING("H5LRget_region_info with NULL entries, 3D dataset");
+     /* 3D hyperslab section region reference  infomation*/
+     status = H5LRget_region_info(file_id,
+-				 (const hdset_reg_ref_t*)ref[3],
++				 (const hdset_reg_ref_t*)&ref[3],
+ 				 &nlength,
+ 				 NULL,
+ 				 &rank_out[2],
+@@ -445,7 +445,7 @@ static int test_regref_hyper( void )
+     rank_out[1] =0;
+     /* 2D hyperslab section region reference infomation*/
+     status = H5LRget_region_info(file_id,
+-				 (const hdset_reg_ref_t*)ref[1],
++				 (const hdset_reg_ref_t*)&ref[1],
+ 				 &nlength,
+ 				 NULL,
+ 				 &rank_out[1],
+@@ -487,7 +487,7 @@ static int test_regref_hyper( void )
+     /* Function should fail if name length is not provided */
+     H5E_BEGIN_TRY {
+     status = H5LRget_region_info(file_id,
+-                                 (const hdset_reg_ref_t*)ref[1],
++                                 (const hdset_reg_ref_t*)&ref[1],
+                                  NULL,
+                                  known_name,
+                                  NULL,
+@@ -509,7 +509,7 @@ static int test_regref_hyper( void )
+     /* Get region reference information */
+     TESTING("H5LRget_region_info, 2D dataset");
+     status = H5LRget_region_info(file_id,
+-				 (const hdset_reg_ref_t*)ref[1],
++				 (const hdset_reg_ref_t*)&ref[1],
+ 				 &nlength,
+ 				 name,
+ 				 &rank_out[1],
+@@ -554,7 +554,7 @@ static int test_regref_hyper( void )
+     /* Get region reference information */
+ 
+     status = H5LRget_region_info(file_id,
+-				 (const hdset_reg_ref_t*)ref[3],
++				 (const hdset_reg_ref_t*)&ref[3],
+ 				 &nlength,
+ 				 name,
+ 				 &rank_out[2],
+@@ -584,7 +584,7 @@ static int test_regref_hyper( void )
+     TESTING("H5LRget_region, 2D dataset");
+     /* Read a region of the 2D data using a region reference */
+     if ( H5LRread_region(file_id,
+-			 (const hdset_reg_ref_t*)ref[1],
++			 (const hdset_reg_ref_t*)&ref[1],
+ 			 H5T_NATIVE_INT,
+ 			 &numelem_size,
+ 			 NULL) < 0) goto out;
+@@ -596,7 +596,7 @@ static int test_regref_hyper( void )
+     data_out = (int *)malloc( numelem_size * sizeof(int));
+ 
+     if ( H5LRread_region(file_id,
+-			 (const hdset_reg_ref_t*)ref[1],
++			 (const hdset_reg_ref_t*)&ref[1],
+ 			 H5T_NATIVE_INT,
+ 			 &numelem_size,
+ 			 data_out) < 0) goto out;
+@@ -715,7 +715,7 @@ static int test_regref_hyper( void )
+ 
+     /* check the data pointed to by the new region reference */
+     status = H5LRread_region(file_id,
+-  			     (const hdset_reg_ref_t*)ref_new,
++  			     (const hdset_reg_ref_t*)&ref_new,
+   			     H5T_NATIVE_INT,
+   			     &numelem_size,
+   			     data_out2);
+@@ -783,7 +783,7 @@ static int test_regref_hyper( void )
+     kk = 0;
+     for (i_size_t=0; i_size_t < num_elem; i_size_t++) {
+       status = H5LRread_region(file_id,
+-			       (const hdset_reg_ref_t*)ref6[i_size_t],
++			       (const hdset_reg_ref_t*)&ref6[i_size_t],
+ 			       H5T_NATIVE_INT,
+ 			       &numelem_size,
+ 			       data_out2);

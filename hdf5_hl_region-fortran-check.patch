@@ -9,9 +9,10 @@
  
  # check to make sure hdf5 was built with --enable-fortran2003 (needed for versions prior to 1.10)
 - CHCK_HDF5VER:= $(strip $(shell $(FC) -showconfig | grep -i "HDF5 Version:" | sed 's/^.* //g'))
-+ CHCK_HDF5VER:= $(strip $(shell $(H5FC) -showconfig | grep -i "HDF5 Version:" | sed 's/^.* //g'))
-  ifeq "$(shell expr $(CHCK_HDF5VER) \<1.9)" "1"
+- ifeq "$(shell expr $(CHCK_HDF5VER) \<1.9)" "1"
 -   CHCK_H5FC2003:= $(strip $(shell $(FC) -showconfig | grep -i 2003))
++ CHCK_HDF5VER:= $(strip $(shell $(H5FC) -showconfig | grep -i "HDF5 Version:" | sed 's/^.* //g'))
++ ifeq "0" "1"
 +   CHCK_H5FC2003:= $(strip $(shell $(H5FC) -showconfig | grep -i 2003))
     ifneq ("$(CHCK_H5FC2003)","Fortran 2003 Compiler: yes")
       $(error "CONFIGURE ERROR: HDF5 library must be built with the --enable-fortran2003 option")

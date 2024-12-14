@@ -1,13 +1,13 @@
 #
 # Conditional build:
 %bcond_without	fortran		# Fortran API
-%bcond_without	tests		# perform "make tests"
+%bcond_without	tests		# unit tests
 #
 Summary:	High-Level Library for handling HDF5 object and region references
 Summary(pl.UTF-8):	Wysokopoziomowa biblioteka do obsługi odniesień do obiektów i regionów HDF5
 Name:		hdf5_hl_region
 Version:	1.1.5
-Release:	1
+Release:	2
 License:	BSD-like, changed sources must be marked
 Group:		Libraries
 Source0:	https://gamma.hdfgroup.org/ftp/pub/outgoing/JPSS/HL_JPSS/hdf5_HL_REGION-%{version}.tar
@@ -15,11 +15,12 @@ Source0:	https://gamma.hdfgroup.org/ftp/pub/outgoing/JPSS/HL_JPSS/hdf5_HL_REGION
 Patch0:		%{name}-shared.patch
 Patch1:		%{name}-destdir.patch
 Patch2:		%{name}-fortran-check.patch
+Patch3:		%{name}-update.patch
 URL:		http://portal.hdfgroup.org/display/support/Joint+Polar+Satellite+System+-+JPSS
-BuildRequires:	hdf5-devel
-%{?with_fortran:BuildRequires:	hdf5-fortran-devel}
-%{?with_tests:BuildRequires:	hdf5-progs}
-BuildRequires:	libtool
+BuildRequires:	hdf5-devel >= 1.14
+%{?with_fortran:BuildRequires:	hdf5-fortran-devel >= 1.14}
+%{?with_tests:BuildRequires:	hdf5-progs >= 1.14}
+BuildRequires:	libtool >= 2:1.5
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %description
@@ -45,7 +46,7 @@ Summary:	Header files for HDF5 HL_REGION library
 Summary(pl.UTF-8):	Pliki nagłówkowe biblioteki HDF5 HL_REGION
 Group:		Development/Libraries
 Requires:	%{name} = %{version}-%{release}
-Requires:	hdf5-devel
+Requires:	hdf5-devel >= 1.14
 
 %description devel
 Header files for HDF5 HL_REGION library.
@@ -116,15 +117,16 @@ Statyczna biblioteka HDF5 HL_REGION dla Fortranu.
 
 %prep
 %setup -q -n hdf5_HL_REGION-%{version}
-%patch0 -p1
-%patch1 -p1
-%patch2 -p1
+%patch -P0 -p1
+%patch -P1 -p1
+%patch -P2 -p1
+%patch -P3 -p1
 
 %build
 %{__make} -j1 \
 	CC="%{__cc}" \
 	FC="%{_target_alias}-gfortran" \
-	CCFLAGS="%{rpmcflags}" \
+	CCFLAGS="%{rpmcflags} -DH5_HAVE_C99_FUNC=1" \
 	FCFLAGS="%{rpmcflags}" \
 	HDF5_INSTALL_DIR=/usr \
 	HDF5_USE_SHLIB=yes \
